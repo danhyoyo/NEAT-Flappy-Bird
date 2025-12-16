@@ -1,0 +1,175 @@
+#1. Cấu hình chung cho thuật toán [NEAT]
+#Phần này quy định cách thuật toán chạy và khi nào thì dừng lại.
+[NEAT]
+# Tiêu chí đánh giá độ thích nghi (fitness). 'max' nghĩa là điểm càng cao càng tốt.
+fitness_criterion     = max
+
+# Ngưỡng điểm để coi là "đã giải quyết xong bài toán". Nếu có cá thể đạt >= 100 điểm, thuật toán dừng.
+fitness_threshold     = 100
+
+# Kích thước quần thể: Số lượng mạng nơ-ron trong mỗi thế hệ (generation).
+# Bài báo gốc dùng 150 cho bài toán đơn giản [cite: 195], hoặc 1000 cho bài khó[cite: 173].
+pop_size              = 50
+
+# Nếu toàn bộ các loài bị tuyệt chủng (không còn cá thể nào sống sót), có reset lại từ đầu không?
+# False nghĩa là sẽ báo lỗi hoặc dừng chương trình thay vì tự reset.
+reset_on_extinction   = False
+
+# Nếu đặt là True, thuật toán sẽ chạy mãi kể cả khi đã đạt fitness_threshold.
+# False nghĩa là đạt điểm 100 ở trên thì dừng ngay.
+no_fitness_termination = False
+
+
+
+#2. Cấu hình Gen (Genome) [DefaultGenome]
+#Đây là phần quan trọng nhất, quy định cấu trúc mạng nơ-ron và xác suất xảy ra các đột biến (mutation) như bài báo mô tả.
+
+Tùy chọn kích hoạt và cấu trúc
+[DefaultGenome]
+# Hàm kích hoạt mặc định cho các nơ-ron (ở đây là hàm tanh - sigmoid).
+activation_default      = tanh
+
+# Tỷ lệ đột biến thay đổi hàm kích hoạt (0.0 nghĩa là không bao giờ đổi hàm khác).
+activation_mutate_rate  = 0.0
+
+# Các loại hàm kích hoạt được phép sử dụng.
+activation_options      = tanh
+
+# Nếu True: Chỉ cho phép 1 loại đột biến cấu trúc xảy ra mỗi lần.
+# False: Có thể vừa thêm nút vừa thêm kết nối cùng lúc.
+single_structural_mutation = false
+
+# Cơ chế xử lý đột biến cấu trúc mặc định của thư viện.
+structural_mutation_surer = default
+
+# Cách khởi tạo giá trị ban đầu cho Bias, Response, Weight (dùng phân phối Gauss - phân phối chuẩn).
+bias_init_type = gaussian
+response_init_type = gaussian
+weight_init_type = gaussian
+
+# Tỷ lệ biến một kết nối đang tắt (disabled) thành bật (enabled).
+enabled_rate_to_true_add = 0.0
+enabled_rate_to_false_add = 0.0
+
+# Số lượng cá thể tối thiểu để duy trì một loài.
+min_species_size = 1
+
+# Cách tổng hợp tín hiệu đầu vào nơ-ron (sum = cộng tất cả lại).
+aggregation_default     = sum
+aggregation_mutate_rate = 0.0
+aggregation_options     = sum
+
+#Tùy chọn tính toán và Bias (Ngưỡng)
+# Cấu hình cho Bias (giá trị ngưỡng của nơ-ron):
+# Bias giúp nơ-ron linh hoạt hơn trong việc kích hoạt.
+bias_init_mean          = 0.0   # Giá trị trung bình khởi tạo
+bias_init_stdev         = 1.0   # Độ lệch chuẩn khởi tạo
+bias_max_value          = 30.0  # Giá trị bias tối đa
+bias_min_value          = -30.0 # Giá trị bias tối thiểu
+bias_mutate_power       = 0.5   # Sức mạnh đột biến (mỗi lần đổi bao nhiêu)
+bias_mutate_rate        = 0.7   # Tỷ lệ xảy ra đột biến bias (70% cơ hội)
+bias_replace_rate       = 0.1   # Tỷ lệ thay thế hoàn toàn bias bằng số mới
+
+
+#Tùy chọn Tương thích (Compatibility) - QUAN TRỌNG CHO PHÂN LOÀI
+#Các thông số này chính là các hệ số $c_1, c_2, c_3$ trong công thức tính khoảng cách $\delta$ của bài báo2.
+# Hệ số c1 và c2 (gộp chung): Trọng số cho các gen Disjoint/Excess (gen khác biệt về cấu trúc).
+# Giá trị cao nghĩa là sự khác biệt cấu trúc bị phạt nặng -> khó cùng loài.
+compatibility_disjoint_coefficient = 1.0
+
+# Hệ số c3: Trọng số cho sự khác biệt về trọng số kết nối (Average weight differences).
+# [cite: 119] giải thích: c3 * W_bar
+compatibility_weight_coefficient   = 0.5
+
+
+#Tùy chọn Đột biến Cấu trúc (Structural Mutation)
+#Bài báo khẳng định NEAT hiệu quả nhờ "tăng trưởng từ cấu trúc tối thiểu" thông qua các đột biến này.
+# Xác suất thêm một kết nối mới giữa 2 nơ-ron hiện có[cite: 67].
+conn_add_prob           = 0.5
+
+# Xác suất xóa một kết nối.
+conn_delete_prob        = 0.5
+
+# Trạng thái mặc định của kết nối (True = đang hoạt động).
+enabled_default         = True
+
+# Xác suất đột biến bật/tắt kết nối (ví dụ: tắt kết nối cũ khi thêm nơ-ron mới [cite: 68]).
+enabled_mutate_rate     = 0.01
+
+# True: Chỉ cho phép kết nối một chiều (input -> output).
+# False: Cho phép kết nối vòng (Recurrent) (cần thiết cho bài toán nhớ trạng thái [cite: 157]).
+feed_forward            = True
+
+# Cấu trúc khởi tạo: 'full' nghĩa là tất cả input nối hết với output, không có hidden node.
+# Điều này tuân thủ nguyên tắc "Starting Minimally" của bài báo[cite: 142].
+initial_connection      = full
+
+# Xác suất thêm một nơ-ron mới (Add Node Mutation)[cite: 68].
+# Thường thấp hơn thêm kết nối vì nó phá vỡ cấu trúc nhiều hơn[cite: 176].
+node_add_prob           = 0.2
+
+# Xác suất xóa một nơ-ron.
+node_delete_prob        = 0.2
+
+#Thông số mạng (Network Parameters)
+# Số lượng nơ-ron ẩn ban đầu = 0.
+# Đúng theo nguyên tắc của NEAT: bắt đầu không có hidden layer[cite: 142].
+num_hidden              = 0
+
+# Số lượng đầu vào (Inputs) của bài toán.
+num_inputs              = 3
+
+# Số lượng đầu ra (Outputs) của bài toán.
+num_outputs             = 1
+
+#Tùy chọn Phản hồi (Response) và Trọng số (Weight)
+# Cấu hình Response (hệ số nhân đầu ra của nơ-ron, thường giữ là 1.0).
+response_init_mean      = 1.0
+response_init_stdev     = 0.0
+response_max_value      = 30.0
+response_min_value      = -30.0
+response_mutate_power   = 0.0
+response_mutate_rate    = 0.0
+response_replace_rate   = 0.0
+
+# Cấu hình Trọng số kết nối (Weights):
+# Trọng số quyết định độ mạnh yếu của liên kết giữa các nơ-ron.
+weight_init_mean        = 0.0
+weight_init_stdev       = 1.0
+weight_max_value        = 30
+weight_min_value        = -30
+weight_mutate_power     = 0.5 # Mức độ thay đổi khi đột biến
+weight_mutate_rate      = 0.8 # Tỷ lệ đột biến trọng số (rất cao để tối ưu mạng) [cite: 65]
+weight_replace_rate     = 0.1
+
+#3. Cấu hình Phân loài [DefaultSpeciesSet]
+[DefaultSpeciesSet]
+# Ngưỡng tương thích (delta_t).
+# Nếu khoảng cách giữa 2 cá thể < 3.0 thì chúng thuộc cùng 1 loài[cite: 122].
+# Nếu đặt quá thấp => Quá nhiều loài. Quá cao => Ít loài, mất đa dạng.
+compatibility_threshold = 3.0
+
+#4. Cấu hình Sự trì trệ [DefaultStagnation]
+#Phần này giúp loại bỏ các loài không chịu tiến bộ, nhường chỗ cho cái mới.
+[DefaultStagnation]
+# Hàm đánh giá sự tiến bộ của loài (dựa trên cá thể tốt nhất - max).
+species_fitness_func = max
+
+# Số thế hệ tối đa cho phép một loài không tăng điểm fitness.
+# Nếu sau 20 thế hệ mà loài không tiến bộ, loài đó bị xóa sổ[cite: 146].
+max_stagnation       = 20
+
+# Số lượng loài tối thiểu được giữ lại (bất tử) dù chúng có bị trì trệ (để tránh tuyệt chủng).
+species_elitism      = 2
+
+#5. Cấu hình Sinh sản [DefaultReproduction]
+[DefaultReproduction]
+# Số lượng cá thể xuất sắc nhất được giữ nguyên sang thế hệ sau (không bị lai ghép/đột biến).
+elitism            = 2
+
+# Ngưỡng sinh tồn: Chỉ top 20% (0.2) cá thể tốt nhất trong mỗi loài mới được phép sinh sản.
+# [cite: 132] đề cập: "The best-performing r% of each species is randomly mated".
+survival_threshold = 0.2
+
+# Kích thước tối thiểu của một loài.
+min_species_size = 1
